@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Controller,
   Get,
@@ -7,6 +8,8 @@ import {
   Param,
   Delete,
 } from '@nestjs/common';
+import { emailTemplate } from '../helpers';
+import { main } from '../config';
 import { ContactService } from './contact.service';
 import { CreateContactDto } from './dto/create-contact.dto';
 import { UpdateContactDto } from './dto/update-contact.dto';
@@ -16,27 +19,21 @@ export class ContactController {
   constructor(private readonly contactService: ContactService) {}
 
   @Post()
-  create(@Body() createContactDto: CreateContactDto) {
-    return this.contactService.create(createContactDto);
+  async create(@Body() createContactDto: CreateContactDto) {
+    try {
+      const message = await this.contactService.create(createContactDto);
+      if (message) {
+        const htmlMessage = emailTemplate(message);
+        main(message.email, htmlMessage, message.message);
+        return 'message';
+      }
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   @Get()
   findAll() {
     return this.contactService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.contactService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateContactDto: UpdateContactDto) {
-    return this.contactService.update(+id, updateContactDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.contactService.remove(+id);
   }
 }
