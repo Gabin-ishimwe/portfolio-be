@@ -22,4 +22,7 @@ export class ContactService {
   findAll() {
     return this.prisma.contact.findMany();
   }
+  deleteAll() {
+    return this.prisma.contact.deleteMany();
+  }
 }

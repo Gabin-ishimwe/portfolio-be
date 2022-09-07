@@ -7,6 +7,7 @@ import {
   Patch,
   Param,
   Delete,
+  NotFoundException,
 } from '@nestjs/common';
 import { emailTemplate } from '../helpers';
 import { main } from '../config';
@@ -25,15 +26,26 @@ export class ContactController {
       if (message) {
         const htmlMessage = emailTemplate(message);
         main(message.email, htmlMessage, message.message);
-        return 'message';
+        return message;
       }
     } catch (error) {
-      console.log(error);
+      // throw error
+      throw new NotFoundException();
     }
   }
 
   @Get()
-  findAll() {
-    return this.contactService.findAll();
+  async findAll() {
+    try {
+      const messages = this.contactService.findAll();
+      return messages;
+    } catch (error) {
+      throw new NotFoundException();
+    }
+  }
+
+  @Delete()
+  async Delete() {
+    return this.contactService.deleteAll();
   }
 }
